@@ -8,12 +8,11 @@ import time
 chrome_options = Options()
 
 # --- 必须的 Linux 参数 ---
-chrome_options.binary_location = "/usr/bin/chromium-browser" # --- 指定 Chromium 路径 ---
 chrome_options.add_argument("--no-sandbox")          # 解决权限/沙箱问题
 chrome_options.add_argument("--disable-dev-shm-usage") # 解决共享内存不足
 chrome_options.add_argument("--disable-gpu")         # 禁用 GPU 加速
-chrome_options.add_argument("--disable-extensions")        # 禁用扩展
-chrome_options.add_argument("--window-size=1920,1080")  # 指定窗口大小
+chrome_options.add_argument("--window-size=1280,720")  # 指定窗口大小
+chrome_options.add_argument("--headless=new")        # 虚拟机没有GUI，加这一行
 
 # ===== 1.2 启动浏览器 =====
 try:
@@ -21,12 +20,10 @@ try:
     print("浏览器启动成功！")
 except Exception as e:
     print("启动失败:", e)
-    
     input("按回车退出...")
     exit()
 
 driver.get("https://battle-city.js.org/#/")
-
 
 # ===== 2. 等待页面加载 =====
 time.sleep(3)
