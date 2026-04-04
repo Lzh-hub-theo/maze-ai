@@ -12,7 +12,7 @@ chrome_options.add_argument("--no-sandbox")          # 解决权限/沙箱问题
 chrome_options.add_argument("--disable-dev-shm-usage") # 解决共享内存不足
 chrome_options.add_argument("--disable-gpu")         # 禁用 GPU 加速
 chrome_options.add_argument("--window-size=1280,720")  # 指定窗口大小
-chrome_options.add_argument("--headless=new")        # 虚拟机没有GUI，加这一行
+# chrome_options.add_argument("--headless=new")        # 虚拟机没有GUI，加这一行
 
 # ===== 1.2 启动浏览器 =====
 try:
@@ -35,7 +35,7 @@ body.send_keys("j") # 进入单机模式
 time.sleep(0.5)
 body.send_keys("j") # 进入第一关
 
-time.sleep(1)
+time.sleep(2)
 
 print("开始控制坦克...")
 
@@ -56,7 +56,7 @@ def shoot():
     body.send_keys("j")
 
 # ===== 5. 测试控制 =====
-time.sleep(2)
+time.sleep(5)
 
 # 示例：移动 + 射击
 move_up()

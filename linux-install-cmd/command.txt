@@ -1,0 +1,30 @@
+pip3.8 install selenium
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo apt install ./google-chrome-stable_current_amd64.deb -y
+
+sudo apt install -y xfce4 xfce4-goodies
+sudo apt install -y tigervnc-standalone-server tigervnc-common
+vncpasswd
+sudo apt install -y dbus-x11 x11-xserver-utils
+
+# 创建启动配置文件
+cat > ~/.vnc/xstartup << 'EOF'
+#!/bin/bash
+
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+
+export XDG_RUNTIME_DIR=/tmp/runtime-$USER
+mkdir -p $XDG_RUNTIME_DIR
+
+startxfce4
+EOF
+# 给予执行权限
+chmod +x ~/.vnc/xstartup
+
+vncserver :1 -geometry 1920x1080 -depth 24
+vim ~/.vnc/config
+文件上下加上这一段：localhost=no
+
+然后在windows11（主机）下载RealVNC
+输入：虚拟机IP地址:5901 就能连接虚拟机桌面
