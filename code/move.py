@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver import ActionChains
+from selenium.webdriver.common.keys import Keys
 import time
 
 # ===== 1. 启动浏览器 =====
@@ -12,7 +14,6 @@ chrome_options.add_argument("--no-sandbox")          # 解决权限/沙箱问题
 chrome_options.add_argument("--disable-dev-shm-usage") # 解决共享内存不足
 chrome_options.add_argument("--disable-gpu")         # 禁用 GPU 加速
 chrome_options.add_argument("--window-size=1280,720")  # 指定窗口大小
-# chrome_options.add_argument("--headless=new")        # 虚拟机没有GUI，加这一行
 
 # ===== 1.2 启动浏览器 =====
 try:
@@ -35,42 +36,83 @@ body.send_keys("j") # 进入单机模式
 time.sleep(0.5)
 body.send_keys("j") # 进入第一关
 
-time.sleep(2)
+time.sleep(1)
 
-print("开始控制坦克...")
+# --- 进入游戏 ---
+actions = ActionChains(driver)
+# actions.send_keys(Keys.RETURN).perform() # 假设回车或 J 进游戏
 
 # ===== 4. 定义动作函数 =====
-def move_up():
-    body.send_keys("w")
+def move_up(operation_time):
+    actions.key_up('a')
+    actions.key_up('d')
+    actions.key_up('w')
+    actions.key_up('s')
+    actions.key_down('w')
+    actions.perform()
+    time.sleep(operation_time)
 
-def move_down():
-    body.send_keys("s")
+def move_down(operation_time):
+    actions.key_up('a')
+    actions.key_up('d')
+    actions.key_up('w')
+    actions.key_up('s')
+    actions.key_down('s')
+    actions.perform() 
+    time.sleep(operation_time)
 
-def move_left():
-    body.send_keys("a")
+def move_left(operation_time):
+    actions.key_up('a')
+    actions.key_up('d')
+    actions.key_up('w')
+    actions.key_up('s')
+    actions.key_down('a')
+    actions.perform() 
+    time.sleep(operation_time)
 
-def move_right():
-    body.send_keys("d")
+def move_right(operation_time):
+    actions.key_up('a')
+    actions.key_up('d')
+    actions.key_up('w')
+    actions.key_up('s')
+    actions.key_down('d')
+    actions.perform()
+    time.sleep(operation_time)
+
+def stop(operation_time):
+    actions.key_up('a')
+    actions.key_up('d')
+    actions.key_up('w')
+    actions.key_up('s')
+    actions.perform()
+    time.sleep(operation_time)
 
 def shoot():
-    body.send_keys("j")
-
+    actions.key_down('j')
+    actions.perform()
+    time.sleep(0.1)
+    actions.key_up('j')
+    actions.perform()
 # ===== 5. 测试控制 =====
-time.sleep(5)
 
-# 示例：移动 + 射击
-move_up()
-time.sleep(0.5)
+time.sleep(1.5)
 
-move_right()
-time.sleep(0.5)
+move_up(0.5)
 
-shoot()
-time.sleep(0.5)
+move_right(0.5)
 
-move_left()
-time.sleep(0.5)
+move_down(0.5)
+
+move_left(0.5)
+
+stop(0.5)
 
 shoot()
+
+time.sleep(1)
+
+shoot()
+
+time.sleep(1)
 
 print("操作完成")
