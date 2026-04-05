@@ -1,0 +1,49 @@
+project/
+│
+├── sense.py              # 主环境（调用）
+├── opengame.py              # 启动浏览器并进入游戏
+├── operation.py              # 操作坦克
+├── vision/
+│     ├── segmentation.py   # ⭐ 像素级分割（本次实现）
+│     ├── filters.py        # 形状过滤
+
+这个是我项目现在的进程，其中opengame,operation开发已经相对完善了。
+现在的重点在于修改sense的一些细节。比如说整合segmentation等等。
+现在sense.py中的detect_game_state怎么整合segmentation和filter？
+
+你可以参考上文中说的一些操作，如下：
+### 修改 detect_game_state
+👉 替换你原来的颜色检测部分：
+```
+masks = self.segmenter.get_masks(img)
+```
+### 示例：检测敌人（升级版）
+```
+mask_enemy = masks["enemy"]
+
+contours, _ = cv2.findContours(mask_enemy, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+contours = ShapeFilter.filter_tank(contours)
+
+for cnt in contours:
+    x, y, w, h = cv2.boundingRect(cnt)
+    center = (x + w//2, y + h//2)
+
+    state['enemy_positions'].append(center)
+    state['enemy_count'] += 1
+
+    cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
+```
+
+顺便帮我在原sense文件中加入下面几行代码来进行调试：
+```
+cv2.imshow("enemy", masks["enemy"])
+cv2.imshow("brick", masks["brick"])
+cv2.imshow("water", masks["water"])
+```
+
+总结需求：
+sense.py中的detect_game_state怎么整合segmentation和filter？
+在原sense文件中加入下面几行代码来进行调试。
+
+注意，直接给我在原sense文件中修改部分的代码。

@@ -14,7 +14,7 @@ class OpenGame:
         chrome_options.add_argument("--no-sandbox")          # 解决权限/沙箱问题
         chrome_options.add_argument("--disable-dev-shm-usage") # 解决共享内存不足
         chrome_options.add_argument("--disable-gpu")         # 禁用 GPU 加速
-        chrome_options.add_argument("--window-size=1280,720")  # 指定窗口大小
+        chrome_options.add_argument("--window-size=820,720")  # 指定窗口大小
 
         # ===== 2 启动浏览器 =====
         try:
