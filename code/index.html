@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden; 
+  }
+
+  #coordinate-display {
+    width: 100vw;
+    height: 100vh;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    background-color: #222; 
+    color: #0f0;            
+    font-family: monospace;
+    font-size: 24px;
+    box-sizing: border-box;
+    cursor: crosshair;     
+  }
+</style>
+</head>
+<body>
+
+  <div id="coordinate-display">
+    点击屏幕任意位置查看坐标
+  </div>
+
+  <script>
+    const display = document.getElementById('coordinate-display');
+
+    // 监听点击事件
+    display.addEventListener('click', function(event) {
+      const { clientX, clientY, pageX, pageY, screenX, screenY } = event;
+
+      display.innerHTML = `
+        <strong>视口坐标 (client):</strong> X: ${clientX}, Y: ${clientY}<br>
+        <strong>页面坐标 (page):</strong> X: ${pageX}, Y: ${pageY}<br>
+        <strong>屏幕坐标 (screen):</strong> X: ${screenX}, Y: ${screenY}
+      `;
+    });
+  </script>
+
+</body>
+</html>

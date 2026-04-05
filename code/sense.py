@@ -47,6 +47,20 @@ class TankGameEnv:
         # print(f"截图成功，分辨率: w:{width}, h:{height}")
         return img, (width, height)
 
+    def crop_game_area(self, img):
+        """
+        裁剪游戏区域（去掉UI、边框）
+        需要你根据实际截图微调参数
+        """
+        h, w, _ = img.shape
+
+        y1 = int(26)
+        y2 = int(442)
+        x1 = int(36)
+        x2 = int(450)
+
+        return img[y1:y2, x1:x2]
+
     def preprocess_image(self, img):
         """
         图像预处理：裁剪掉非游戏区域（如黑边），调整大小
@@ -157,28 +171,23 @@ class TankGameEnv:
         """
         print("Demo 开始。按 Ctrl+C 或 关闭窗口 停止。")
         
-        # 等待游戏加载或直接开始
-        # 如果是刚打开的页面，可能需要按 J 开始
-        # time.sleep(2)
-        # body = self.driver.find_element("tag name", "body")
-        # body.send_keys(Keys.J)
-        # time.sleep(1)
-
         while True:
             try:
                 raw_img, win_size = self.capture_screen()
+                raw_img = self.crop_game_area(raw_img)
                 state, annotated_img = self.detect_game_state(raw_img)
+                cv2.imshow("Cropped", raw_img)
                 
-                # 打印状态信息
-                print(f"玩家位置: {state['player_pos']}, 敌人数量: {state['enemy_count']}")
+                # # 打印状态信息
+                # print(f"玩家位置: {state['player_pos']}, 敌人数量: {state['enemy_count']}")
 
-                # 随机选择一个动作
-                action = random.randint(0, 5) # 包含 0 到 5
-                self.step(action)
+                # # 随机选择一个动作
+                # action = random.randint(0, 5) # 包含 0 到 5
+                # self.step(action)
                 
-                # 调整图像大小以便显示
-                display_img = cv2.resize(annotated_img, (800, 600))
-                cv2.imshow('Game View - Player (Green) vs Enemy (Red)', display_img)
+                # # 调整图像大小以便显示
+                # display_img = cv2.resize(annotated_img, (600, 600))
+                # cv2.imshow('Game View - Player (Green) vs Enemy (Red)', display_img)
                 
                 # 按 'q' 退出
                 if cv2.waitKey(1) & 0xFF == ord('q'):
