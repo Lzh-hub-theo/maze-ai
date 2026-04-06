@@ -11,6 +11,7 @@ from opengame import OpenGame
 from operation import Operation 
 from vision.segmentation import Segmenter
 from vision.filters import ShapeFilter
+from vision.hsv_tuner import HSVTuner
 
 class TankGameEnv:
     def __init__(self):
@@ -51,7 +52,7 @@ class TankGameEnv:
         h, w, _ = img.shape
         y1 = int(30)
         y2 = int(450)
-        x1 = int(36)
+        x1 = int(28)
         x2 = int(450)
         return img[y1:y2, x1:x2]
 
@@ -74,8 +75,8 @@ class TankGameEnv:
             x, y, w, h = cv2.boundingRect(cnt)
             center = (x + w//2, y + h//2)
             state['player_pos'] = center
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
-            cv2.putText(img, "Player", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            # cv2.putText(img, "Player", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
         # 3. 敌人检测
         mask_enemy = masks["enemy"]
@@ -88,8 +89,8 @@ class TankGameEnv:
             center = (x + w//2, y + h//2)
             state['enemy_positions'].append(center)
             state['enemy_count'] += 1
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
-            cv2.putText(img, "Enemy", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+            # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
+            # cv2.putText(img, "Enemy", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
         # 4. 砖墙
         mask_brick = masks["brick"]
@@ -97,8 +98,8 @@ class TankGameEnv:
         contours_brick = ShapeFilter.filter_wall(contours_brick)
         for cnt in contours_brick:
             x, y, w, h = cv2.boundingRect(cnt)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 165, 255), 1)  # 橙色
-            cv2.putText(img, "brick", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+            # cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 1)  # 蓝色
+            # cv2.putText(img, "brick", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
         # 5. 水
         mask_water = masks["water"]
@@ -106,8 +107,8 @@ class TankGameEnv:
         contours_water = ShapeFilter.filter_wall(contours_water)
         for cnt in contours_water:
             x, y, w, h = cv2.boundingRect(cnt)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 1)  # 蓝色
-            cv2.putText(img, "river", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+            # cv2.rectangle(img, (x, y), (x+w, y+h), (0, 165, 255), 1)  # 橙色
+            # cv2.putText(img, "river", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
         # 6. 子弹
         mask_bullet = masks["bullet"]
@@ -115,8 +116,8 @@ class TankGameEnv:
         contours_bullet = ShapeFilter.filter_bullet(contours_bullet)
         for cnt in contours_bullet:
             x, y, w, h = cv2.boundingRect(cnt)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 1)  # 蓝色
-            cv2.putText(img, "bullet", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+            # cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 1)  # 蓝色
+            # cv2.putText(img, "bullet", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
         # 7. 铁墙
         mask_steel = masks["steel"]
@@ -124,8 +125,8 @@ class TankGameEnv:
         contours_steel = ShapeFilter.filter_wall(contours_steel)
         for cnt in contours_steel:
             x, y, w, h = cv2.boundingRect(cnt)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 1)  # 蓝色
-            cv2.putText(img, "steel", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+            # cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 1)  # 蓝色
+            # cv2.putText(img, "steel", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
         # 8. 草地
         mask_grass = masks["grass"]
@@ -133,8 +134,17 @@ class TankGameEnv:
         contours_grass = ShapeFilter.filter_wall(contours_grass)
         for cnt in contours_grass:
             x, y, w, h = cv2.boundingRect(cnt)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 1)  # 蓝色
-            cv2.putText(img, "grass", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+            # cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 1)  # 蓝色
+            # cv2.putText(img, "grass", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+
+        # 9. 基地
+        mask_base = masks["base"]
+        contours_base, _ = cv2.findContours(mask_base, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours_base = ShapeFilter.filter_wall(contours_base)
+        for cnt in contours_base:
+            x, y, w, h = cv2.boundingRect(cnt)
+            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 1)  # 绿色
+            cv2.putText(img, "base", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
         return state, img
 
@@ -160,13 +170,17 @@ class TankGameEnv:
         print("Demo 开始。按 Ctrl+C 或 关闭窗口 停止。")
         
         while True:
-            time.sleep(0.03)
+            # time.sleep(0.03)
+            time.sleep(5)
             try:
                 raw_img, win_size = self.capture_screen()
                 raw_img = self.crop_game_area(raw_img)
                 state, annotated_img = self.detect_game_state(raw_img)
                 if self.debug:
                     cv2.imshow("Cropped", annotated_img)
+                    tuner = HSVTuner()
+                    tuner.run(raw_img)
+                    break
                 
                 # 打印状态信息
                 print(f"玩家位置: {state['player_pos']}, 敌人数量: {state['enemy_count']}")
