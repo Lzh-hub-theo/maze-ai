@@ -13,6 +13,14 @@ project/
 ├── vision/
 │     ├── segmentation.py   # 像素级分割
 │     ├── filters.py        # 形状过滤
+│     ├── entity/
+│            ├── bullet.py  
+│            ├── enemy.py  
+│            ├── grass.py  
+│            ├── ironwall.py  
+│            ├── river.py  
+│            ├── wall.py
+│            ├── player.py
 
 这个是我项目现在的结构，其中opengame,operation开发已经相对完善了。
 我现在的需求在于让程序对图片上的图像进行分类（区分敌我坦克，砖墙贴墙河流等等）

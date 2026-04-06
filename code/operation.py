@@ -67,18 +67,3 @@ class Operation:
         time.sleep(0.1)
         self.actions.key_up('j')
         self.actions.perform()
-
-# # ===== 5. 测试控制 =====
-# if __name__ == "__main__":
-#     operation = Operation()
-#     time.sleep(1.5)
-#     operation.move_up(0.5)
-#     operation.move_right(0.5)
-#     operation.move_down(0.5)
-#     operation.move_left(0.5)
-#     operation.stop(0.5)
-#     operation.shoot()
-#     time.sleep(1)
-#     operation.shoot()
-#     time.sleep(1)
-#     print("操作完成")

@@ -6,6 +6,8 @@ project/
 ├── vision/
 │     ├── segmentation.py   # ⭐ 像素级分割（本次实现）
 │     ├── filters.py        # 形状过滤
+│     ├── entity/
+│           ├── enemy.py
 
 这个是我项目现在的进程，其中opengame,operation开发已经相对完善了。
 现在的重点在于修改sense的一些细节。比如说整合segmentation等等。
