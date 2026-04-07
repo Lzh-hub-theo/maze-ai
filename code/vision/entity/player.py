@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from ..filters import ShapeFilter
 
 class PlayerTankDetector:
     def __init__(self):
@@ -28,3 +29,15 @@ class PlayerTankDetector:
         mask_combined = cv2.morphologyEx(mask_combined, cv2.MORPH_CLOSE, kernel)
         
         return mask_combined
+    
+    def detect_object(self, hsv, img, state):
+        # 2. 玩家检测
+        mask_player = self.get_mask(hsv)
+        contours_player, _ = cv2.findContours(mask_player, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours_player = ShapeFilter.filter_tank(contours_player)
+        for cnt in contours_player:
+            x, y, w, h = cv2.boundingRect(cnt)
+            center = (x + w//2, y + h//2)
+            state['player_pos'] = center
+            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            cv2.putText(img, "Player", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)

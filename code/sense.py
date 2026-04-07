@@ -11,7 +11,7 @@ from operation import Operation
 from vision.segmentation import Segmenter
 from vision.filters import ShapeFilter
 from vision.hsv_tuner import HSVTuner
-from code.vision.partition import GridPartition
+from vision.partition import GridPartition
 
 class TankGameEnv:
     def __init__(self):
@@ -64,77 +64,7 @@ class TankGameEnv:
             'enemy_positions': []
         }
 
-        # 1. 获取所有mask
-        masks = self.segmenter.get_masks(img)
-
-        # 2. 玩家检测
-        mask_player = masks["player"]
-        contours_player, _ = cv2.findContours(mask_player, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours_player = ShapeFilter.filter_tank(contours_player)
-        for cnt in contours_player:
-            x, y, w, h = cv2.boundingRect(cnt)
-            center = (x + w//2, y + h//2)
-            state['player_pos'] = center
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
-            cv2.putText(img, "Player", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-
-        # 3. 敌人检测
-        mask_enemy = masks["enemy"]
-        contours_enemy, _ = cv2.findContours(mask_enemy, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours_enemy = ShapeFilter.filter_tank(contours_enemy) # 形状过滤，解决砖墙误判
-        for cnt in contours_enemy:
-            x, y, w, h = cv2.boundingRect(cnt)
-            center = (x + w//2, y + h//2)
-            state['enemy_positions'].append(center)
-            state['enemy_count'] += 1
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
-            cv2.putText(img, "Enemy", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-
-        # 4. 砖墙
-        mask_brick = masks["brick"]
-        brick_cells = GridPartition.extract_wall_cells(mask_brick, grid_size=8)
-        for (x, y, w, h) in brick_cells:
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 165, 255), 1)
-            # cv2.putText(img, "Br", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-
-        # 5. 水
-        mask_water = masks["water"]
-        river_cells = GridPartition.extract_wall_cells(mask_water, grid_size=32)
-        for (x, y, w, h) in river_cells:
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 165, 255), 1)
-            cv2.putText(img, "R", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-
-        # 6. 子弹
-        mask_bullet = masks["bullet"]
-        contours_bullet, _ = cv2.findContours(mask_bullet, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours_bullet = ShapeFilter.filter_bullet(contours_bullet)
-        for cnt in contours_bullet:
-            x, y, w, h = cv2.boundingRect(cnt)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 1)  # 蓝色
-            cv2.putText(img, "bullet", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-
-        # 7. 铁墙
-        mask_steel = masks["steel"]
-        steel_cells = GridPartition.extract_wall_cells(mask_steel, grid_size=16)
-        for (x, y, w, h) in steel_cells:
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 165, 255), 1)
-            cv2.putText(img, "S", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-
-        # 8. 草地
-        mask_grass = masks["grass"]
-        grass_cells = GridPartition.extract_wall_cells(mask_grass, grid_size=32)
-        for (x, y, w, h) in grass_cells:
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 165, 255), 1)
-            cv2.putText(img, "G", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-
-        # 9. 基地
-        mask_base = masks["base"]
-        contours_base, _ = cv2.findContours(mask_base, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours_base = ShapeFilter.filter_wall(contours_base)
-        for cnt in contours_base:
-            x, y, w, h = cv2.boundingRect(cnt)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 1)  # 绿色
-            cv2.putText(img, "base", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        self.segmenter.detect_objects(img, state)
 
         return state, img
 
@@ -160,7 +90,7 @@ class TankGameEnv:
         print("Demo 开始。按 Ctrl+C 或 关闭窗口 停止。")
         
         while True:
-            time.sleep(0.03)
+            # time.sleep(0.03)
             # time.sleep(5)
             try:
                 raw_img, win_size = self.capture_screen()

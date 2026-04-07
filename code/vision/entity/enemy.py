@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from ..filters import ShapeFilter
 
 class EnemyDetector:
     def __init__(self):
@@ -28,3 +29,16 @@ class EnemyDetector:
         mask_combined = cv2.morphologyEx(mask_combined, cv2.MORPH_CLOSE, kernel)
         
         return mask_combined
+    
+    def detect_object(self, hsv, img, state):
+        # 3. 敌人检测
+        mask_enemy = self.get_mask(hsv)
+        contours_enemy, _ = cv2.findContours(mask_enemy, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours_enemy = ShapeFilter.filter_tank(contours_enemy) # 形状过滤，解决砖墙误判
+        for cnt in contours_enemy:
+            x, y, w, h = cv2.boundingRect(cnt)
+            center = (x + w//2, y + h//2)
+            state['enemy_positions'].append(center)
+            state['enemy_count'] += 1
+            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
+            cv2.putText(img, "Enemy", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)

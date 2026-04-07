@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from ..partition import GridPartition
 
 class GrassDetector:
     def __init__(self):
@@ -28,3 +29,11 @@ class GrassDetector:
         mask_combined = cv2.morphologyEx(mask_combined, cv2.MORPH_CLOSE, kernel)
         
         return mask_combined
+    
+    def detect_object(self, hsv, img):
+        # 8. 草地
+        mask_grass = self.get_mask(hsv)
+        grass_cells = GridPartition.extract_wall_cells(mask_grass, grid_size=32)
+        for (x, y, w, h) in grass_cells:
+            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 165, 255), 1)
+            cv2.putText(img, "G", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)

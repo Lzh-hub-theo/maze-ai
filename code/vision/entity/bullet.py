@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from ..filters import ShapeFilter
 
 class BulletDetector:
     def __init__(self):
@@ -11,8 +12,7 @@ class BulletDetector:
         # --- 2. 创建掩膜 ---
         mask = cv2.inRange(hsv, self.lower_gray, self.upper_gray)
 
-        # --- 3. 后处理 (关键步骤) ---
-        # 因为子弹很小，我们需要去除噪点，同时保留小物体
+        # 去除噪点，同时保留小物体
         kernel = np.ones((3, 3), np.uint8)
         
         # 开运算：先腐蚀后膨胀，去除细小的噪点（比如背景的纹理）
@@ -22,3 +22,13 @@ class BulletDetector:
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=1)
 
         return mask
+    
+    def detect_object(self, hsv, img):
+        # 6. 子弹
+        mask_bullet = self.get_mask(hsv)
+        contours_bullet, _ = cv2.findContours(mask_bullet, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours_bullet = ShapeFilter.filter_bullet(contours_bullet)
+        for cnt in contours_bullet:
+            x, y, w, h = cv2.boundingRect(cnt)
+            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 1)  # 蓝色
+            cv2.putText(img, "bullet", (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
