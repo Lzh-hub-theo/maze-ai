@@ -1,0 +1,7 @@
+battle-city/build/
+battle-city/dist/
+battle-city/.idea/
+npm-debug.log*
+battle-city/node_modules/
+battle-city/.vscode
+battle-city/yarn.lock
