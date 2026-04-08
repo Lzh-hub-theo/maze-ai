@@ -25,9 +25,9 @@ class EnemyDetector:
         self.template_matcher = TemplateMatcher(
             template_paths=[
                 os.path.join(BASE_DIR, "vision", "template", "enemy_bot", "tank1.png"),
-                os.path.join(BASE_DIR, "vision", "template", "enemy_bot", "tank1.png"),
-                os.path.join(BASE_DIR, "vision", "template", "enemy_bot", "tank1.png"),
-                os.path.join(BASE_DIR, "vision", "template", "enemy_bot", "tank1.png")
+                os.path.join(BASE_DIR, "vision", "template", "enemy_bot", "tank2.png"),
+                os.path.join(BASE_DIR, "vision", "template", "enemy_bot", "tank3.png"),
+                os.path.join(BASE_DIR, "vision", "template", "enemy_bot", "tank4.png")
             ]
         )
 

@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 class TemplateMatcher:
-    def __init__(self, template_paths, threshold=0.6):
+    def __init__(self, template_paths, threshold=0.4):
         """
         template_paths: 模板图片路径列表
         threshold: 匹配阈值（0~1）

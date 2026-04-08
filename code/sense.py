@@ -9,9 +9,7 @@ import time
 from opengame import OpenGame 
 from operation import Operation 
 from vision.segmentation import Segmenter
-from vision.filters import ShapeFilter
 from vision.hsv_tuner import HSVTuner
-from vision.partition import GridPartition
 
 class TankGameEnv:
     def __init__(self):
