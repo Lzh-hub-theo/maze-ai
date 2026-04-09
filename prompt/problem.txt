@@ -1,0 +1,72 @@
+export default function* playerController(tankId: TankId, config: PlayerConfig) {
+  let firePressing = false // 用来记录当前玩家是否按下了fire键
+  let firePressed = false // 用来记录上一个tick内 玩家是否按下过fire键
+  const pressed: Direction[] = [] // 用来记录上一个tick内, 玩家按下过的方向键
+  const AI_MODE = true
+
+  // 调用该函数来获取当前用户的移动操作(坦克级别)
+  function getPlayerInput(tank: TankRecord): Input {
+    if (AI_MODE) {
+      pressed = rlController.pressed
+      firePressing = rlController.firePressing
+    }
+
+    const direction = pressed.length > 0 ? last(pressed) : null
+    if (direction != null) {
+      if (direction !== tank.direction) {
+        return { type: 'turn', direction } as Input
+      } else {
+        return { type: 'forward' }
+      }
+    }
+  }
+}
+这个是我感觉疑惑的代码pressed用const定义。pressed = rlController.pressed这一段修改直接报错
+
+还有一段main.tsx:
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('container'),
+)
+
+if (process.env.NODE_ENV === 'development') {
+  const env = new TankEnv()
+
+  setTimeout(() => {
+    let state = env.reset()
+
+    for (let i = 0; i < 200; i++) {
+      const action = Math.floor(Math.random() * 6)
+      const result = env.step(action)
+
+      if (result.done) {
+        console.log('Episode finished at step', i)
+        break
+      }
+    }
+
+    console.log('RL test finished')
+  }, 1000)
+}
+这是我的源文件，怎么改成下面？
+import { TankEnv } from './rl/env'
+import { RLAction } from './rl/action'
+
+const env = new TankEnv()
+
+setTimeout(() => {
+  env.reset()
+
+  const loop = () => {
+    const action = Math.floor(Math.random() * 10)
+    const result = env.step(action)
+
+    if (!result.done) {
+      requestAnimationFrame(loop)
+    }
+  }
+
+  loop()
+}, 1000)

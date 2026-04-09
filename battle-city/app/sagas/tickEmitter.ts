@@ -23,6 +23,7 @@ export default function* tickEmitter(options: TickEmitterOptions = {}) {
     let requestId = requestAnimationFrame(emitTick)
 
     function emitTick() {
+      if (AI_MODE) return
       const now = performance.now()
       ReactDOM.unstable_batchedUpdates(emit, actions.tick(now - lastTime))
       lastTime = now

@@ -1,0 +1,37 @@
+现在我要定义RL的Action
+Phase 2：定义 RL 的 Action（动作空间）
+我想要直接控制“玩家输入层”，利用我现有的：pressed[]，firePressing
+
+ 定义离散动作：
+enum Action {
+  NOOP,
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+  FIRE,
+  UP_FIRE,
+  ...
+}
+ 转换为控制：
+applyAction(action) {
+  pressed = []
+  firePressing = false
+
+  if (action === UP) pressed.push('up')
+  if (action === FIRE) firePressing = true
+}
+✔ 优点：
+
+不破坏现有架构
+完全复用 playerController
+
+请问这一步的具体实现怎么做，需要修改哪个文件的哪个部分，参考上文我给你的项目结构。
+
+这里是我按照上文增量添加的文件结构
+ battle-city/
+  ├── app/
+  │   ├── rl/
+  │   │   ├── action.ts
+  │   │   ├── controller.ts
+  │   │   ├── env.ts

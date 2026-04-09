@@ -19,18 +19,25 @@ if (process.env.NODE_ENV === 'development') {
   const env = new TankEnv()
 
   setTimeout(() => {
-    let state = env.reset()
+    env.reset()
 
-    for (let i = 0; i < 200; i++) {
-      const action = Math.floor(Math.random() * 6)
+    let stepCount = 0
+
+    const loop = () => {
+      const action = Math.floor(Math.random() * 10)
+
       const result = env.step(action)
 
+      stepCount++
+
       if (result.done) {
-        console.log('Episode finished at step', i)
-        break
+        console.log('Episode finished at step', stepCount)
+        return
       }
+
+      requestAnimationFrame(loop)
     }
 
-    console.log('RL test finished')
+    loop()
   }, 1000)
 }

@@ -5,7 +5,7 @@ import { Input, PlayerConfig, TankRecord } from '../types'
 import { A } from '../utils/actions'
 import directionController from './directionController'
 import fireController from './fireController'
-import { aiPressed, aiFire } from '../rl/controller'
+import { rlController } from '../rl/controller'
 
 // 一个 playerController 实例对应一个人类玩家(用户)的控制器.
 // 参数playerName用来指定人类玩家的玩家名称, config为该玩家的操作配置.
@@ -22,7 +22,7 @@ export default function* playerController(tankId: TankId, config: PlayerConfig) 
     yield all([
       directionController(tankId, getPlayerInput),
       fireController(tankId, () => 
-        AI_MODE ? aiFire : firePressed || firePressing
+        AI_MODE ? rlController.firePressing : firePressed || firePressing
       ),
       resetFirePressedEveryTick(),
     ])
@@ -71,8 +71,11 @@ export default function* playerController(tankId: TankId, config: PlayerConfig) 
 
   // 调用该函数来获取当前用户的移动操作(坦克级别)
   function getPlayerInput(tank: TankRecord): Input {
-    const pressedSource = AI_MODE ? aiPressed : pressed
-    const fireSource = AI_MODE ? aiFire : (firePressed || firePressing)
+    if (AI_MODE) {
+      pressed.length = 0
+      pressed.push(...rlController.pressed)
+      firePressing = rlController.firePressing
+    }
 
     const direction = pressed.length > 0 ? last(pressed) : null
     if (direction != null) {
@@ -82,7 +85,6 @@ export default function* playerController(tankId: TankId, config: PlayerConfig) 
         return { type: 'forward' }
       }
     }
-    return null
   }
 
   function* resetFirePressedEveryTick() {
