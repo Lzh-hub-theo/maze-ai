@@ -47,6 +47,7 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     fps = 20
     screen.fill(color.White)
+    gameover = False
 
 
     # 加载角色照片
@@ -86,6 +87,7 @@ if __name__ == '__main__':
             elif(roomx == 0 and roomy == 2):
                 font3 = pygame.font.Font(None, 32)
                 print_text(font3, 350, 350, "Win", color.Red)
+                gameover = True
                 break
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
@@ -187,3 +189,14 @@ if __name__ == '__main__':
 
         # 更新屏幕
         pygame.display.update()
+
+        if gameover:
+            font = pygame.font.Font(None, 32)
+            print_text(font, 350, 350, "Press Any Key to Close", color.Black)
+            pygame.display.update()
+
+            while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
+                        pygame.quit()
+                        sys.exit()
