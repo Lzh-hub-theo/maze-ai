@@ -21,6 +21,7 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
 ROOM_SIZE = 15
 TRAINING_EPISODES = 500  # 训练轮数
+FONT_PATH = 'simhei.ttf'
 
 # 动作映射：0=上 1=下 2=左 3=右
 ACTION_NAMES = ['UP', 'DOWN', 'LEFT', 'RIGHT']
@@ -44,7 +45,7 @@ def print_text(font, x, y, text, color_val, shadow=True):
 def train_agent(env, agent, episodes=TRAINING_EPISODES):
     """训练Q-learning agent"""
     print(f"开始训练Agent，共{episodes}轮次...")
-    font = pygame.font.Font(None, 24)
+    font = pygame.font.Font(FONT_PATH, 24)
     
     for episode in range(episodes):
         state = env.reset()
@@ -113,25 +114,25 @@ def play_ai_mode(env, agent, r_list):
     for i in range(6):
         for j in range(6):
             if r_list[j][i] == 0 or r_list[j][i] == 3:
-                pygame.draw.rect(screen, color.White, [25 + i * ROOM_SIZE, 25 + j * ROOM_SIZE, 10, 10], 1)
+                pygame.draw.rect(screen, color.White, [30 + i * ROOM_SIZE, 30 + j * ROOM_SIZE, 10, 10], 1)
             elif r_list[j][i] == 1:
-                pygame.draw.rect(screen, color.Black, [25 + i * ROOM_SIZE, 25 + j * ROOM_SIZE, 10, 10], 0)
+                pygame.draw.rect(screen, color.Black, [30 + i * ROOM_SIZE, 30 + j * ROOM_SIZE, 10, 10], 0)
     
     # 绘制起点和终点
-    pygame.draw.circle(screen, color.Blue, [30 + 5 * ROOM_SIZE, 30 + 2 * ROOM_SIZE], 5, 0)
-    pygame.draw.circle(screen, color.Red, [30 + 0 * ROOM_SIZE, 30 + 2 * ROOM_SIZE], 5, 0)
+    pygame.draw.circle(screen, color.Blue, [35 + 5 * ROOM_SIZE, 35 + 2 * ROOM_SIZE], 5, 0)
+    pygame.draw.circle(screen, color.Red, [35 + 0 * ROOM_SIZE, 35 + 2 * ROOM_SIZE], 5, 0)
     pygame.display.flip()
     
     # AI演示
     state = env.reset()
     roomx, roomy = 5, 2
-    x = 25 + roomx * ROOM_SIZE
-    y = 25 + roomy * ROOM_SIZE
+    x = 30 + roomx * ROOM_SIZE
+    y = 30 + roomy * ROOM_SIZE
     
     screen.blit(user, (x, y))
     pygame.display.flip()
     
-    font = pygame.font.Font(None, 32)
+    font = pygame.font.Font(FONT_PATH, 32)
     steps = 0
     max_steps = 100
     
@@ -156,8 +157,8 @@ def play_ai_mode(env, agent, r_list):
             dx, dy = ACTION_TO_DIRECTION[action]
             roomx += dx
             roomy += dy
-            x = 25 + roomx * ROOM_SIZE
-            y = 25 + roomy * ROOM_SIZE
+            x = 30 + roomx * ROOM_SIZE
+            y = 30 + roomy * ROOM_SIZE
             
             state = next_state
             steps += 1
@@ -176,7 +177,7 @@ def play_ai_mode(env, agent, r_list):
             
             if done:
                 # 到达目标
-                screen.fill(color.White, (25, 0, 400, 25))
+                screen.fill(color.White, (22, 0, 400, 30))
                 print_text(font, 300, 0, f"AI Win! Steps: {steps}", color.Red)
                 print_text(font, 250, 350, "按任意键继续", color.Black)
                 pygame.display.flip()
@@ -210,19 +211,23 @@ def play_manual_mode(r_list):
     for i in range(6):
         for j in range(6):
             if r_list[j][i] == 0 or r_list[j][i] == 3:
-                pygame.draw.rect(screen, color.White, [25 + i * ROOM_SIZE, 25 + j * ROOM_SIZE, 10, 10], 1)
+                pygame.draw.rect(screen, color.White, [30 + i * ROOM_SIZE, 30 + j * ROOM_SIZE, 10, 10], 1)
             elif r_list[j][i] == 1:
-                pygame.draw.rect(screen, color.Black, [25 + i * ROOM_SIZE, 25 + j * ROOM_SIZE, 10, 10], 0)
+                pygame.draw.rect(screen, color.Black, [30 + i * ROOM_SIZE, 30 + j * ROOM_SIZE, 10, 10], 0)
     
+    # 绘制起点和终点
+    pygame.draw.circle(screen, color.Blue, [35 + 5 * ROOM_SIZE, 35 + 2 * ROOM_SIZE], 5, 0)
+    pygame.draw.circle(screen, color.Red, [35 + 0 * ROOM_SIZE, 35 + 2 * ROOM_SIZE], 5, 0)
+
     # 初始位置
     roomx, roomy = 5, 2
-    x = 25 + roomx * ROOM_SIZE
-    y = 25 + roomy * ROOM_SIZE
+    x = 30 + roomx * ROOM_SIZE
+    y = 30 + roomy * ROOM_SIZE
     
     screen.blit(user, (x, y))
     pygame.display.flip()
     
-    font = pygame.font.Font(None, 32)
+    font = pygame.font.Font(FONT_PATH, 32)
     steps = 0
     gameover = False
     
@@ -238,7 +243,7 @@ def play_manual_mode(r_list):
                 
                 # 检查目标
                 if roomx == 0 and roomy == 2:
-                    font = pygame.font.Font(None, 32)
+                    font = pygame.font.Font(FONT_PATH, 32)
                     print_text(font, 250, 350, "You Win!", color.Red)
                     print_text(font, 200, 400, "按任意键回到菜单", color.Black)
                     pygame.display.flip()
@@ -310,8 +315,8 @@ def play_manual_mode(r_list):
 def show_menu():
     """显示菜单"""
     screen.fill(color.White)
-    font_large = pygame.font.Font(None, 48)
-    font_small = pygame.font.Font(None, 32)
+    font_large = pygame.font.Font(FONT_PATH, 48)
+    font_small = pygame.font.Font(FONT_PATH, 32)
     
     print_text(font_large, 200, 150, "Maze AI Game", color.Black)
     print_text(font_small, 150, 300, "1. AI Auto Play (AI自动演示)", color.Black)
