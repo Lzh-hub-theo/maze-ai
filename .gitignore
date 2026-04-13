@@ -8,6 +8,7 @@ battle-city/yarn.lock
 battle-city-cv/node_modules/
 ai-maze-navigation/code/__pycache__/
 .vscode/
+Maze_AI/statistic
 
 # 依赖的迷宫游戏ignore
 # Byte-compiled / optimized / DLL files

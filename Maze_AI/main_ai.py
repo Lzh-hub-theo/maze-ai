@@ -5,11 +5,8 @@
 
 import pygame
 import sys
-import random
-import time
 from pygame.locals import *
 from random import randint, choice
-import maze
 import color
 import mapp1
 from maze_env import MazeEnv
@@ -43,30 +40,25 @@ def print_text(font, x, y, text, color_val, shadow=True):
 
 
 def train_agent(env, agent, episodes=TRAINING_EPISODES):
-    """训练Q-learning agent"""
+    """训练Q-learning agent，并记录每轮reward，训练结束后绘制reward曲线图"""
     print(f"开始训练Agent，共{episodes}轮次...")
     font = pygame.font.Font(FONT_PATH, 24)
-    
+    rewards_list = []
     for episode in range(episodes):
         state = env.reset()
         total_reward = 0
         steps = 0
-        
         while steps < 100:
             action = agent.choose_action(state)
             next_state, reward, done = env.step(action)
-            
             agent.learn(state, action, reward, next_state)
-            
             state = next_state
             total_reward += reward
             steps += 1
-            
             if done:
                 break
-        
         agent.decay_epsilon()
-        
+        rewards_list.append(total_reward)
         # 每50轮打印一次训练进度
         if (episode + 1) % 50 == 0:
             print(f"Episode {episode+1}/{episodes}, Reward: {total_reward:.2f}, Epsilon: {agent.epsilon:.3f}")
@@ -75,8 +67,29 @@ def train_agent(env, agent, episodes=TRAINING_EPISODES):
             print_text(font, 300, 350, f"Training: {episode+1}/{episodes}", color.Black)
             pygame.display.flip()
             pygame.time.delay(100)
-    
     print("训练完成！")
+    # 训练结束后绘制reward曲线
+    try:
+        import matplotlib.pyplot as plt
+        import os
+        save_dir = os.path.join(os.path.dirname(__file__), 'statistic')
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        plt.figure(figsize=(8, 5))
+        plt.plot(rewards_list, label='Episode Reward')
+        plt.xlabel('Episode')
+        plt.ylabel('Reward')
+        plt.title('Q-Learning Training Reward Curve')
+        plt.legend()
+        plt.tight_layout()
+        save_path = os.path.join(save_dir, 'reward_curve.png')
+        plt.savefig(save_path)
+        plt.close()
+        print(f"训练曲线已保存到: {save_path}")
+    except ImportError:
+        print("未检测到matplotlib库，无法绘制reward曲线。请先安装matplotlib。");
+    except Exception as e:
+        print(f"绘制reward曲线时出错: {e}")
 
 
 def action_to_room_change(roomx, roomy, action):
@@ -319,7 +332,7 @@ def show_menu():
     font_small = pygame.font.Font(FONT_PATH, 32)
     
     print_text(font_large, 200, 150, "Maze AI Game", color.Black)
-    print_text(font_small, 150, 300, "1. AI Auto Play (AI自动演示)", color.Black)
+    print_text(font_small, 150, 300, "1. Maze AI Game (AI自动演示)", color.Black)
     print_text(font_small, 150, 350, "2. Manual Play (手动操作)", color.Black)
     print_text(font_small, 150, 400, "Q. Quit (退出)", color.Black)
     
