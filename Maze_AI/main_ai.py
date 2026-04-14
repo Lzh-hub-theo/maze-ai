@@ -8,7 +8,7 @@ import sys
 from pygame.locals import *
 from random import randint, choice
 import color
-import mapp1
+import mapp
 from maze_env import MazeEnv
 from dqn_agent import DQNAgent
 
@@ -107,8 +107,11 @@ def is_valid_move(roomx, roomy, action, r_list):
     """检查移动是否有效（不撞墙）"""
     new_roomx, new_roomy = action_to_room_change(roomx, roomy, action)
     
+    rows = len(r_list)
+    cols = len(r_list[0])
+
     # 检查边界
-    if new_roomx < 0 or new_roomx >= 6 or new_roomy < 0 or new_roomy >= 6:
+    if new_roomx < 0 or new_roomx >= cols or new_roomy < 0 or new_roomy >= rows:
         return False
     
     # 检查是否是墙（值为1）
@@ -125,21 +128,26 @@ def play_ai_mode(env, agent, r_list):
     user = pygame.transform.smoothscale(user, (8, 8))
     
     # 绘制迷宫
-    for i in range(6):
-        for j in range(6):
+    rows = len(r_list)
+    cols = len(r_list[0])
+
+    for j in range(rows):
+        for i in range(cols):
             if r_list[j][i] == 0 or r_list[j][i] == 3:
                 pygame.draw.rect(screen, color.White, [30 + i * ROOM_SIZE, 30 + j * ROOM_SIZE, 10, 10], 1)
             elif r_list[j][i] == 1:
                 pygame.draw.rect(screen, color.Black, [30 + i * ROOM_SIZE, 30 + j * ROOM_SIZE, 10, 10], 0)
     
-    # 绘制起点和终点
-    pygame.draw.circle(screen, color.Blue, [35 + 5 * ROOM_SIZE, 35 + 2 * ROOM_SIZE], 5, 0)
-    pygame.draw.circle(screen, color.Red, [35 + 0 * ROOM_SIZE, 35 + 2 * ROOM_SIZE], 5, 0)
-    pygame.display.flip()
-    
     # AI演示
     state = env.reset()
-    roomx, roomy = 5, 2
+    roomx, roomy = start_pos
+    endx, endy = end_pos
+
+    # 绘制起点和终点
+    pygame.draw.circle(screen, color.Blue, [35 + roomx * ROOM_SIZE, 35 + roomy * ROOM_SIZE], 5, 0)
+    pygame.draw.circle(screen, color.Red, [35 + endx * ROOM_SIZE, 35 + endy * ROOM_SIZE], 5, 0)
+    pygame.display.flip()
+
     x = 30 + roomx * ROOM_SIZE
     y = 30 + roomy * ROOM_SIZE
     
@@ -222,19 +230,24 @@ def play_manual_mode(r_list):
     user = pygame.transform.smoothscale(user, (8, 8))
     
     # 绘制迷宫
-    for i in range(6):
-        for j in range(6):
+    rows = len(r_list)
+    cols = len(r_list[0])
+
+    for j in range(rows):
+        for i in range(cols):
             if r_list[j][i] == 0 or r_list[j][i] == 3:
                 pygame.draw.rect(screen, color.White, [30 + i * ROOM_SIZE, 30 + j * ROOM_SIZE, 10, 10], 1)
             elif r_list[j][i] == 1:
                 pygame.draw.rect(screen, color.Black, [30 + i * ROOM_SIZE, 30 + j * ROOM_SIZE, 10, 10], 0)
-    
-    # 绘制起点和终点
-    pygame.draw.circle(screen, color.Blue, [35 + 5 * ROOM_SIZE, 35 + 2 * ROOM_SIZE], 5, 0)
-    pygame.draw.circle(screen, color.Red, [35 + 0 * ROOM_SIZE, 35 + 2 * ROOM_SIZE], 5, 0)
 
     # 初始位置
-    roomx, roomy = 5, 2
+    roomx, roomy = start_pos
+    endx, endy = end_pos
+
+    # 绘制起点和终点
+    pygame.draw.circle(screen, color.Blue, [35 + roomx * ROOM_SIZE, 35 + roomy * ROOM_SIZE], 5, 0)
+    pygame.draw.circle(screen, color.Red, [35 + endx * ROOM_SIZE, 35 + endy * ROOM_SIZE], 5, 0)
+
     x = 30 + roomx * ROOM_SIZE
     y = 30 + roomy * ROOM_SIZE
     
@@ -256,7 +269,7 @@ def play_manual_mode(r_list):
                     return True
                 
                 # 检查目标
-                if roomx == 0 and roomy == 2:
+                if (roomx, roomy) == end_pos:
                     font = pygame.font.Font(FONT_PATH, 32)
                     print_text(font, 250, 350, "You Win!", color.Red)
                     print_text(font, 200, 400, "按任意键回到菜单", color.Black)
@@ -364,9 +377,8 @@ if __name__ == '__main__':
 
     # 创建环境和agent
     env = MazeEnv()
-    state_size = env.maze_width * env.maze_height  # 6*6 = 36
     action_size = env.action_size  # 4
-    agent = DQNAgent(state_size, action_size)
+    agent = DQNAgent(action_size)
 
     # DQN模型保存路径
     import os
@@ -395,14 +407,19 @@ if __name__ == '__main__':
         agent.save(model_path)
         print(f"DQN模型已保存到：{model_path}")
 
-    # 加载迷宫
-    r_list = [row[:] for row in mapp1.map_list]
+    # 加载大地图
+    r_list = [row[:] for row in mapp.map_list]
+    # TODO 修改地图中的3为0（起点标记变为通路）
+    start_pos = None
+    end_pos = None
 
-    # 修改地图中的3为0（起点标记变为通路）
-    for i in range(6):
-        for j in range(6):
-            if r_list[j][i] == 3:
-                r_list[j][i] = 0
+    for y in range(len(r_list)):
+        for x in range(len(r_list[0])):
+            if r_list[y][x] == 9:
+                start_pos = (x, y)
+                r_list[y][x] = 0
+            elif r_list[y][x] == 3:
+                end_pos = (x, y)
 
     # 菜单循环
     while True:

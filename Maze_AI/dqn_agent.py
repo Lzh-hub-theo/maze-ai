@@ -7,10 +7,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+
 class DQNNet(nn.Module):
-    def __init__(self, state_size, action_size):
+    def __init__(self, action_size):
         super(DQNNet, self).__init__()
-        self.fc1 = nn.Linear(state_size, 64)
+        self.fc1 = nn.Linear(2, 64)
         self.fc2 = nn.Linear(64, 64)
         self.fc3 = nn.Linear(64, action_size)
 
@@ -19,9 +20,9 @@ class DQNNet(nn.Module):
         x = torch.relu(self.fc2(x))
         return self.fc3(x)
 
+
 class DQNAgent:
-    def __init__(self, state_size, action_size, device=None):
-        self.state_size = state_size
+    def __init__(self, action_size, device=None):
         self.action_size = action_size
         self.memory = deque(maxlen=2000)
         self.gamma = 0.9
@@ -31,8 +32,8 @@ class DQNAgent:
         self.batch_size = 32
         self.learning_rate = 1e-3
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.policy_net = DQNNet(state_size, action_size).to(self.device)
-        self.target_net = DQNNet(state_size, action_size).to(self.device)
+        self.policy_net = DQNNet(action_size).to(self.device)
+        self.target_net = DQNNet(action_size).to(self.device)
         self.update_target()
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.learning_rate)
         self.loss_fn = nn.MSELoss()
@@ -48,7 +49,7 @@ class DQNAgent:
     def choose_action(self, state):
         if np.random.rand() < self.epsilon:
             return random.randrange(self.action_size)
-        state = torch.FloatTensor(self._one_hot(state)).unsqueeze(0).to(self.device)
+        state = torch.FloatTensor(state).unsqueeze(0).to(self.device)
         with torch.no_grad():
             q_values = self.policy_net(state)
         return torch.argmax(q_values).item()
@@ -58,8 +59,8 @@ class DQNAgent:
             return
         minibatch = random.sample(self.memory, self.batch_size)
         states, actions, rewards, next_states, dones = zip(*minibatch)
-        states = torch.FloatTensor([self._one_hot(s) for s in states]).to(self.device)
-        next_states = torch.FloatTensor([self._one_hot(s) for s in next_states]).to(self.device)
+        states = torch.FloatTensor(states).to(self.device)
+        next_states = torch.FloatTensor(next_states).to(self.device)
         actions = torch.LongTensor(actions).unsqueeze(1).to(self.device)
         rewards = torch.FloatTensor(rewards).unsqueeze(1).to(self.device)
         dones = torch.FloatTensor(dones).unsqueeze(1).to(self.device)
@@ -78,7 +79,7 @@ class DQNAgent:
             self.epsilon *= self.epsilon_decay
 
     def get_best_action(self, state):
-        state = torch.FloatTensor(self._one_hot(state)).unsqueeze(0).to(self.device)
+        state = torch.FloatTensor(state).unsqueeze(0).to(self.device)
         with torch.no_grad():
             q_values = self.policy_net(state)
         return torch.argmax(q_values).item()
@@ -89,9 +90,3 @@ class DQNAgent:
     def load(self, filepath):
         self.policy_net.load_state_dict(torch.load(filepath, map_location=self.device))
         self.update_target()
-
-    def _one_hot(self, state):
-        # 假设state为int，离散状态，做one-hot编码
-        arr = np.zeros(self.state_size, dtype=np.float32)
-        arr[state] = 1.0
-        return arr
