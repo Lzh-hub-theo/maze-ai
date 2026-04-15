@@ -140,26 +140,25 @@ def play_ai_mode(env, agent, r_list):
     
     # AI演示
     state = env.reset()
-    roomx, roomy = start_pos
     endx, endy = end_pos
 
     # 绘制起点和终点
+    roomx, roomy = env.agent_pos
     pygame.draw.circle(screen, color.Blue, [35 + roomx * ROOM_SIZE, 35 + roomy * ROOM_SIZE], 5, 0)
     pygame.draw.circle(screen, color.Red, [35 + endx * ROOM_SIZE, 35 + endy * ROOM_SIZE], 5, 0)
     pygame.display.flip()
 
     x = 30 + roomx * ROOM_SIZE
     y = 30 + roomy * ROOM_SIZE
-    
     screen.blit(user, (x, y))
     pygame.display.flip()
-    
+
     font = pygame.font.Font(FONT_PATH, 32)
     steps = 0
     max_steps = 100
-    
+
     print("AI开始演示迷宫路径...")
-    
+
     while steps < max_steps:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -167,56 +166,48 @@ def play_ai_mode(env, agent, r_list):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return True
-        
-        # AI选择动作（使用贪心策略）
+
         action = agent.get_best_action(state)
-        
-        # 尝试执行动作
-        if is_valid_move(roomx, roomy, action, r_list):
-            next_state, reward, done = env.step(action)
-            
-            # 更新位置
-            dx, dy = ACTION_TO_DIRECTION[action]
-            roomx += dx
-            roomy += dy
-            x = 30 + roomx * ROOM_SIZE
-            y = 30 + roomy * ROOM_SIZE
-            
-            state = next_state
-            steps += 1
-            
-            # 清除旧位置，绘制新位置
-            screen.fill(color.White, (x - ROOM_SIZE, y, 10, 10) if dx > 0 else 
-                                      (x + ROOM_SIZE, y, 10, 10) if dx < 0 else
-                                      (x, y - ROOM_SIZE, 10, 10) if dy > 0 else
-                                      (x, y + ROOM_SIZE, 10, 10))
-            screen.blit(user, (x, y))
-            
-            # 显示步数
-            screen.fill(color.White, (25, 0, 200, 25))
-            print_text(font, 25, 0, f"Steps: {steps}", color.Black)
+        next_state, reward, done = env.step(action)
+        # 直接用环境的agent_pos
+        roomx, roomy = env.agent_pos
+        x = 30 + roomx * ROOM_SIZE
+        y = 30 + roomy * ROOM_SIZE
+        state = next_state
+        steps += 1
+
+        # 清除旧位置，绘制新位置
+        screen.fill(color.White)
+        # 重新绘制迷宫
+        for j in range(rows):
+            for i in range(cols):
+                if r_list[j][i] == 0 or r_list[j][i] == 3:
+                    pygame.draw.rect(screen, color.White, [30 + i * ROOM_SIZE, 30 + j * ROOM_SIZE, 10, 10], 1)
+                elif r_list[j][i] == 1:
+                    pygame.draw.rect(screen, color.Black, [30 + i * ROOM_SIZE, 30 + j * ROOM_SIZE, 10, 10], 0)
+        pygame.draw.circle(screen, color.Blue, [35 + start_pos[0] * ROOM_SIZE, 35 + start_pos[1] * ROOM_SIZE], 5, 0)
+        pygame.draw.circle(screen, color.Red, [35 + endx * ROOM_SIZE, 35 + endy * ROOM_SIZE], 5, 0)
+        screen.blit(user, (x, y))
+
+        # 显示步数
+        screen.fill(color.White, (25, 0, 200, 25))
+        print_text(font, 25, 0, f"Steps: {steps}", color.Black)
+        pygame.display.flip()
+
+        if done:
+            # 到达目标
+            screen.fill(color.White, (22, 0, 400, 30))
+            print_text(font, 300, 0, f"AI Win! Steps: {steps}", color.Red)
+            print_text(font, 250, 350, "按任意键继续", color.Black)
             pygame.display.flip()
-            
-            if done:
-                # 到达目标
-                screen.fill(color.White, (22, 0, 400, 30))
-                print_text(font, 300, 0, f"AI Win! Steps: {steps}", color.Red)
-                print_text(font, 250, 350, "按任意键继续", color.Black)
-                pygame.display.flip()
-                
-                # 等待用户输入
-                while True:
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            return False
-                        elif event.type == pygame.KEYDOWN:
-                            return True
-            
-            pygame.time.delay(500)  # 延迟500ms，便于观看
-        else:
-            # 如果当前动作无效，AI重新选择
-            state = env._get_state()
-    
+            # 等待用户输入
+            while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        return False
+                    elif event.type == pygame.KEYDOWN:
+                        return True
+        pygame.time.delay(500)
     return True
 
 
@@ -378,7 +369,14 @@ if __name__ == '__main__':
     # 创建环境和agent
     env = MazeEnv()
     action_size = env.action_size  # 4
-    agent = DQNAgent(action_size)
+    agent = DQNAgent(
+        action_size,
+        learning_rate=1e-3,   # 可调
+        gamma=0.9,            # 可调
+        epsilon=1.0,          # 可调
+        epsilon_decay=0.995,  # 可调
+        epsilon_min=0.1       # 可调
+    )
 
     # DQN模型保存路径
     import os

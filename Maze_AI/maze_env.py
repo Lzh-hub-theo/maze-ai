@@ -11,14 +11,14 @@ class MazeEnv:
         self.map_list = [row[:] for row in mapp.map_list]
         self.maze_height = len(self.map_list)
         self.maze_width = len(self.map_list[0])
-        # 自动查找起点(3)和终点(9)，若无则默认左上/右下
+        # 统一主程序定义：9为起点，3为终点
         self.start_pos = None
         self.goal_pos = None
         for y in range(self.maze_height):
             for x in range(self.maze_width):
-                if self.map_list[y][x] == 3:
-                    self.start_pos = (x, y)
                 if self.map_list[y][x] == 9:
+                    self.start_pos = (x, y)
+                if self.map_list[y][x] == 3:
                     self.goal_pos = (x, y)
         if self.start_pos is None:
             self.start_pos = (self.maze_width-2, 1)  # 默认右上角附近
@@ -54,9 +54,12 @@ class MazeEnv:
         else:
             new_x, new_y = x, y
         if not self._is_walkable(new_x, new_y):
-            return self._get_state(), -1.0, False
+            # 撞墙
+            return self._get_state(), -50.0, False
         self.agent_pos = (new_x, new_y)
         next_state = self._get_state()
         if self.agent_pos == self.goal_pos:
+            # 到达终点
             return next_state, 100.0, True
-        return next_state, -0.1, False
+        # 普通步
+        return next_state, -1.0, False

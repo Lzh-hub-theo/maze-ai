@@ -22,15 +22,15 @@ class DQNNet(nn.Module):
 
 
 class DQNAgent:
-    def __init__(self, action_size, device=None):
+    def __init__(self, action_size, device=None, learning_rate=1e-3, gamma=0.9, epsilon=1.0, epsilon_decay=0.995, epsilon_min=0.1):
         self.action_size = action_size
         self.memory = deque(maxlen=2000)
-        self.gamma = 0.9
-        self.epsilon = 1.0
-        self.epsilon_min = 0.1
-        self.epsilon_decay = 0.995
+        self.gamma = gamma
+        self.epsilon = epsilon
+        self.epsilon_min = epsilon_min
+        self.epsilon_decay = epsilon_decay
         self.batch_size = 32
-        self.learning_rate = 1e-3
+        self.learning_rate = learning_rate
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.policy_net = DQNNet(action_size).to(self.device)
         self.target_net = DQNNet(action_size).to(self.device)
