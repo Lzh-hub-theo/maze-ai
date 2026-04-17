@@ -1,66 +1,58 @@
 # DQNAgent for Maze_AI
 # Author: Copilot
+
 import random
 import numpy as np
-from collections import deque
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
-
-class DQNNet(nn.Module):
-    def __init__(self, action_size):
-        super(DQNNet, self).__init__()
-        self.fc1 = nn.Linear(2, 64)
-        self.fc2 = nn.Linear(64, 64)
-        self.fc3 = nn.Linear(64, action_size)
-
-    def forward(self, x):
-        x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
-        return self.fc3(x)
-
+# 新增导入
+from dqn.replay_buffer import ReplayBuffer
+from dqn.dqn_net import DQNNet
 
 class DQNAgent:
-    def __init__(self, action_size, device=None, learning_rate=1e-3, gamma=0.9, epsilon=1.0, epsilon_decay=0.995, epsilon_min=0.1):
+    def __init__(self, action_size, state_dim=2, device=None, learning_rate=1e-3, gamma=0.99, epsilon=1.0, epsilon_decay=0.995, epsilon_min=0.1):
         self.action_size = action_size
-        self.memory = deque(maxlen=2000)
+        self.memory = ReplayBuffer(maxlen=10000)
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
-        self.batch_size = 32
+        self.batch_size = 64
         self.learning_rate = learning_rate
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.policy_net = DQNNet(action_size).to(self.device)
-        self.target_net = DQNNet(action_size).to(self.device)
+        self.policy_net = DQNNet(state_dim, action_size, hidden_dim=256, dropout_p=0.2).to(self.device)
+        self.target_net = DQNNet(state_dim, action_size, hidden_dim=256, dropout_p=0.2).to(self.device)
         self.update_target()
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.learning_rate)
         self.loss_fn = nn.MSELoss()
         self.learn_step = 0
-        self.target_update_freq = 100
+        self.target_update_freq = 500
 
     def update_target(self):
         self.target_net.load_state_dict(self.policy_net.state_dict())
 
     def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
+        self.memory.add(state, action, reward, next_state, done)
 
     def choose_action(self, state):
         if np.random.rand() < self.epsilon:
             return random.randrange(self.action_size)
         state = torch.FloatTensor(state).unsqueeze(0).to(self.device)
+        self.policy_net.eval()
         with torch.no_grad():
             q_values = self.policy_net(state)
+        self.policy_net.train()
         return torch.argmax(q_values).item()
 
     def learn(self):
         if len(self.memory) < self.batch_size:
             return
-        minibatch = random.sample(self.memory, self.batch_size)
+        minibatch = self.memory.sample(self.batch_size)
         states, actions, rewards, next_states, dones = zip(*minibatch)
-        states = torch.FloatTensor(states).to(self.device)
-        next_states = torch.FloatTensor(next_states).to(self.device)
+        import numpy as np
+        states = torch.FloatTensor(np.array(states)).to(self.device)
+        next_states = torch.FloatTensor(np.array(next_states)).to(self.device)
         actions = torch.LongTensor(actions).unsqueeze(1).to(self.device)
         rewards = torch.FloatTensor(rewards).unsqueeze(1).to(self.device)
         dones = torch.FloatTensor(dones).unsqueeze(1).to(self.device)
@@ -75,13 +67,21 @@ class DQNAgent:
         self.learn_step += 1
         if self.learn_step % self.target_update_freq == 0:
             self.update_target()
+        # epsilon 衰减移到 episode 结束后
+        # if self.epsilon > self.epsilon_min:
+        #     self.epsilon *= self.epsilon_decay
+    def decay_epsilon(self):
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
+            if self.epsilon < self.epsilon_min:
+                self.epsilon = self.epsilon_min
 
     def get_best_action(self, state):
         state = torch.FloatTensor(state).unsqueeze(0).to(self.device)
+        self.policy_net.eval()
         with torch.no_grad():
             q_values = self.policy_net(state)
+        self.policy_net.train()
         return torch.argmax(q_values).item()
 
     def save(self, filepath):

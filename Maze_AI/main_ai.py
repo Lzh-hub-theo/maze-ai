@@ -17,7 +17,7 @@ from dqn_agent import DQNAgent
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
 ROOM_SIZE = 15
-TRAINING_EPISODES = 500  # 训练轮数
+TRAINING_EPISODES = 5000  # 训练轮数
 FONT_PATH = 'simhei.ttf'
 
 # 动作映射：0=上 1=下 2=左 3=右
@@ -49,7 +49,7 @@ def train_agent(env, agent, episodes=TRAINING_EPISODES):
         total_reward = 0
         steps = 0
         done = False
-        while steps < 100:
+        while steps < 1000:
             action = agent.choose_action(state)
             next_state, reward, done = env.step(action)
             agent.remember(state, action, reward, next_state, done)
@@ -59,10 +59,11 @@ def train_agent(env, agent, episodes=TRAINING_EPISODES):
             steps += 1
             if done:
                 break
+        agent.decay_epsilon()  # 每个episode结束后衰减epsilon
         rewards_list.append(total_reward)
+        print(f"Episode {episode+1}/{episodes}, Reward: {total_reward:.2f}, Steps: {steps}, Epsilon: {agent.epsilon:.3f}")
         # 每50轮打印一次训练进度
         if (episode + 1) % 50 == 0:
-            print(f"Episode {episode+1}/{episodes}, Reward: {total_reward:.2f}, Epsilon: {agent.epsilon:.3f}")
             # 显示训练进度
             screen.fill(color.White)
             print_text(font, 300, 350, f"Training: {episode+1}/{episodes}", color.Black)
@@ -155,7 +156,7 @@ def play_ai_mode(env, agent, r_list):
 
     font = pygame.font.Font(FONT_PATH, 32)
     steps = 0
-    max_steps = 100
+    max_steps = 3000
 
     print("AI开始演示迷宫路径...")
 
@@ -372,10 +373,10 @@ if __name__ == '__main__':
     agent = DQNAgent(
         action_size,
         learning_rate=1e-3,   # 可调
-        gamma=0.9,            # 可调
+        gamma=0.999,           # 统一gamma
         epsilon=1.0,          # 可调
-        epsilon_decay=0.995,  # 可调
-        epsilon_min=0.1       # 可调
+        epsilon_decay=0.9995,  # 可调
+        epsilon_min=0.01       # 可调
     )
 
     # DQN模型保存路径

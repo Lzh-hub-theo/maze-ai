@@ -6,6 +6,12 @@ import numpy as np
 import mapp
 
 class MazeEnv:
+    # 奖励设置
+    REWARD_GOAL = 200.0      # 到达终点奖励（提升）
+    REWARD_STEP = -0.01      # 每步惩罚（减小）
+    REWARD_WALL = -5.0       # 撞墙惩罚（加大）
+    REWARD_REVISIT = -0.1    # 重复访问惩罚
+
     """基于mapp.py的大地图迷宫环境，状态为归一化(x, y)"""
     def __init__(self):
         self.map_list = [row[:] for row in mapp.map_list]
@@ -25,10 +31,13 @@ class MazeEnv:
         if self.goal_pos is None:
             self.goal_pos = (1, self.maze_height-2)  # 默认左下角附近
         self.action_size = 4
+        self.visited = set()
         self.reset()
 
     def reset(self):
         self.agent_pos = self.start_pos
+        self.visited = set()
+        self.visited.add(self.start_pos)   # 起点默认已访问
         return self._get_state()
 
     def _get_state(self):
@@ -55,11 +64,19 @@ class MazeEnv:
             new_x, new_y = x, y
         if not self._is_walkable(new_x, new_y):
             # 撞墙
-            return self._get_state(), -50.0, False
+            return self._get_state(), self.REWARD_WALL, False
         self.agent_pos = (new_x, new_y)
         next_state = self._get_state()
         if self.agent_pos == self.goal_pos:
             # 到达终点
-            return next_state, 100.0, True
+            return next_state, self.REWARD_GOAL, True
         # 普通步
-        return next_state, -1.0, False
+         # 计算普通步奖励（含重复访问惩罚）
+        reward = self.REWARD_STEP
+        if self.agent_pos in self.visited:
+            reward += self.REWARD_REVISIT
+        else:
+            self.visited.add(self.agent_pos)
+
+        return next_state, reward, False
+
