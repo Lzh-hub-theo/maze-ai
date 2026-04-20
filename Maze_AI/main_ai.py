@@ -12,6 +12,16 @@ import mapp
 from maze_env import MazeEnv
 from dqn_agent import DQNAgent
 
+import torch
+print(f"PyTorch version: {torch.__version__}")
+print(f"CUDA available: {torch.cuda.is_available()}")
+if torch.cuda.is_available():
+    print(f"CUDA version: {torch.version.cuda}")
+    print(f"GPU count: {torch.cuda.device_count()}")
+    print(f"Current GPU: {torch.cuda.get_device_name()}")
+else:
+    print("CUDA not available, training on CPU")
+
 
 # 常量定义
 SCREEN_WIDTH = 800

@@ -21,6 +21,10 @@ class DQNAgent:
         self.batch_size = 64
         self.learning_rate = learning_rate
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        print(f"Using device: {self.device}")
+        if self.device == "cuda":
+            print(f"CUDA version: {torch.version.cuda}")
+            print(f"GPU: {torch.cuda.get_device_name(0)}")
         self.policy_net = DQNNet(state_dim, action_size, hidden_dim=256, dropout_p=0.2).to(self.device)
         self.target_net = DQNNet(state_dim, action_size, hidden_dim=256, dropout_p=0.2).to(self.device)
         self.update_target()

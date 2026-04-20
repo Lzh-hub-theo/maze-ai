@@ -9,7 +9,7 @@ class MazeEnv:
     # 奖励设置
     REWARD_GOAL = 200.0      # 到达终点奖励（提升）
     REWARD_STEP = -0.01      # 每步惩罚（减小）
-    REWARD_WALL = -5.0       # 撞墙惩罚（加大）
+    REWARD_WALL = -0.01       # 撞墙惩罚（加大）
     REWARD_REVISIT = -0.1    # 重复访问惩罚
 
     """基于mapp.py的大地图迷宫环境，状态为归一化(x, y)"""

@@ -1,0 +1,10 @@
+# Requirements for Maze_AI DQN Training
+# Install PyTorch with CUDA support for GPU training:
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+torch>=2.0.0
+torchvision
+torchaudio
+numpy
+pygame
+matplotlib
