@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-# 新增导入
 from dqn.replay_buffer import ReplayBuffer
 from dqn.dqn_net import DQNNet
 
@@ -25,16 +24,18 @@ class DQNAgent:
         if self.device == "cuda":
             print(f"CUDA version: {torch.version.cuda}")
             print(f"GPU: {torch.cuda.get_device_name(0)}")
-        self.policy_net = DQNNet(state_dim, action_size, hidden_dim=256, dropout_p=0.2).to(self.device)
-        self.target_net = DQNNet(state_dim, action_size, hidden_dim=256, dropout_p=0.2).to(self.device)
+        self.policy_net = DQNNet(state_dim, action_size, hidden_dim=256, dropout_p=0.0).to(self.device)
+        self.target_net = DQNNet(state_dim, action_size, hidden_dim=256, dropout_p=0.0).to(self.device)
+        self.target_net.eval()  # 目标网络始终保持 eval 模式
         self.update_target()
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.learning_rate)
-        self.loss_fn = nn.MSELoss()
+        self.loss_fn = nn.SmoothL1Loss()  # 使用 Huber 损失，更稳定
         self.learn_step = 0
         self.target_update_freq = 500
 
     def update_target(self):
         self.target_net.load_state_dict(self.policy_net.state_dict())
+        self.target_net.eval()  # 确保目标网络始终在 eval 模式
 
     def remember(self, state, action, reward, next_state, done):
         self.memory.add(state, action, reward, next_state, done)
@@ -54,7 +55,6 @@ class DQNAgent:
             return
         minibatch = self.memory.sample(self.batch_size)
         states, actions, rewards, next_states, dones = zip(*minibatch)
-        import numpy as np
         states = torch.FloatTensor(np.array(states)).to(self.device)
         next_states = torch.FloatTensor(np.array(next_states)).to(self.device)
         actions = torch.LongTensor(actions).unsqueeze(1).to(self.device)
@@ -62,6 +62,7 @@ class DQNAgent:
         dones = torch.FloatTensor(dones).unsqueeze(1).to(self.device)
         q_values = self.policy_net(states).gather(1, actions)
         with torch.no_grad():
+            self.target_net.eval()  # 确保目标网络在 eval 模式
             next_q = self.target_net(next_states).max(1)[0].unsqueeze(1)
             target = rewards + self.gamma * next_q * (1 - dones)
         loss = self.loss_fn(q_values, target)

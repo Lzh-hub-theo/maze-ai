@@ -67,11 +67,6 @@ def compute_distance_score(maze):
 if __name__ == "__main__":
     result = compute_distance_score(map_list)
 
-    for i in range(len(result)):
-        for j in range(len(result[i])):
-            if result[i][j] != 0:
-                result[i][j] -= 181
-    
     # 计算整个矩阵中所有数字的最大位数（用于对齐）
     max_val = max(max(row) for row in result) + 1
     width = len(str(max_val))
@@ -80,6 +75,7 @@ if __name__ == "__main__":
     print("score_matrix = [")
     for i, row in enumerate(result):
         # 将每个数字格式化为固定宽度的字符串
+        # formatted_row = "[" + ", ".join(f"{val:{6}.1f}" for val in row) + "]"
         formatted_row = "[" + ", ".join(f"{val:{6}d}" for val in row) + "]"
         if i < len(result) - 1:
             print(f"    {formatted_row},")

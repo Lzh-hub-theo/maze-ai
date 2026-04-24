@@ -4,12 +4,13 @@
 
 import numpy as np
 import mapp
+from score_map import score_matrix
 
 class MazeEnv:
     # 奖励设置
-    REWARD_GOAL = 200.0      # 到达终点奖励（提升）
-    REWARD_STEP = -0.01      # 每步惩罚（减小）
-    REWARD_WALL = -0.01       # 撞墙惩罚（加大）
+    REWARD_GOAL = 20000.0      # 到达终点奖励
+    REWARD_STEP = 0      # 每步惩罚
+    REWARD_WALL = -0.1       # 撞墙惩罚
     REWARD_REVISIT = -0.1    # 重复访问惩罚
 
     """基于mapp.py的大地图迷宫环境，状态为归一化(x, y)"""
@@ -65,18 +66,21 @@ class MazeEnv:
         if not self._is_walkable(new_x, new_y):
             # 撞墙
             return self._get_state(), self.REWARD_WALL, False
+        old_x, old_y = x, y
         self.agent_pos = (new_x, new_y)
         next_state = self._get_state()
         if self.agent_pos == self.goal_pos:
             # 到达终点
             return next_state, self.REWARD_GOAL, True
         # 普通步
-         # 计算普通步奖励（含重复访问惩罚）
+        # 计算普通步奖励（含重复访问惩罚）
         reward = self.REWARD_STEP
         if self.agent_pos in self.visited:
-            reward += self.REWARD_REVISIT
+            reward = reward + self.REWARD_REVISIT + (score_matrix[new_y][new_x] - score_matrix[old_y][old_x])
         else:
             self.visited.add(self.agent_pos)
+            x, y = self.agent_pos
+            reward += (score_matrix[y][x] - score_matrix[old_y][old_x])
 
         return next_state, reward, False
 
