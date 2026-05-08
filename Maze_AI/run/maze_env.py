@@ -77,7 +77,7 @@ class MazeEnv:
 
         potential_old = score_matrix[old_y][old_x]
         potential_new = score_matrix[new_y][new_x]
-        shaping = 0.998 * potential_new - potential_old
+        shaping = 0.998 * potential_old - potential_new
         reward = self.REWARD_STEP + shaping
 
         if self.agent_pos in self.visited:

@@ -9,35 +9,36 @@ map_list = mapp.map_list
 
 def compute_distance_score(maze):
     """
-    计算迷宫每个位置相对于起点(3)的“分数”
-    距离越近分数越高，越远分数越低，不可达位置分数为0
+    计算迷宫每个位置到终点(3)的最短步数
+    起点(9)为坦克初始位置，终点(3)为最终目标
+    每个格子的值 = 从这个点到终点(3)的最短步数
     """
     rows = len(maze)
     cols = len(maze[0])
-    
-    # 1. 寻找起点坐标 (值为3)
-    start = None
+
+    # 1. 寻找终点坐标 (值为3) - 作为BFS起点
+    end = None
     for r in range(rows):
         for c in range(cols):
             if maze[r][c] == 3:
-                start = (r, c)
+                end = (r, c)
                 break
-        if start:
+        if end:
             break
-    
-    if not start:
-        raise ValueError("迷宫中未找到起点（值为3的格子）")
-    
-    # 2. BFS 计算最短距离
+
+    if not end:
+        raise ValueError("迷宫中未找到终点（值为3的格子）")
+
+    # 2. BFS 计算从终点(3)到每个位置的最短距离
     dist = [[-1] * cols for _ in range(rows)]   # -1 表示未访问/不可达
     q = deque()
-    sr, sc = start
-    dist[sr][sc] = 0
-    q.append((sr, sc))
-    
+    er, ec = end
+    dist[er][ec] = 0
+    q.append((er, ec))
+
     # 四个方向：上，下，左，右
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-    
+
     while q:
         r, c = q.popleft()
         for dr, dc in directions:
@@ -47,21 +48,14 @@ def compute_distance_score(maze):
                 if maze[nr][nc] != 1 and dist[nr][nc] == -1:
                     dist[nr][nc] = dist[r][c] + 1
                     q.append((nr, nc))
-    
-    # 3. 将距离映射为分数
-    # 获取所有可达点的最大距离
-    max_dist = max((d for row in dist for d in row if d != -1), default=0)
-    
+
+    # 3. 不可达位置分数设为0，可达位置为到终点的步数
     score = [[0] * cols for _ in range(rows)]
     for r in range(rows):
         for c in range(cols):
             if dist[r][c] != -1:
-                # 距离越小分数越高，最远点分数为1，起点分数为 max_dist + 1
-                score[r][c] = max_dist - dist[r][c] + 1
-            else:
-                # 墙壁或不可达区域分数设为0
-                score[r][c] = 0
-                
+                score[r][c] = dist[r][c]
+
     return score
 
 if __name__ == "__main__":
@@ -70,7 +64,7 @@ if __name__ == "__main__":
     # 计算整个矩阵中所有数字的最大位数（用于对齐）
     max_val = max(max(row) for row in result) + 1
     width = len(str(max_val))
-    
+
     # 打印格式化的矩阵，每列宽度一致，右对齐
     print("score_matrix = [")
     for i, row in enumerate(result):
@@ -82,4 +76,3 @@ if __name__ == "__main__":
         else:
             print(f"    {formatted_row}")
     print("]")
-
