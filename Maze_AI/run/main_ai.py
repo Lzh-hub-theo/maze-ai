@@ -28,7 +28,8 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
 ROOM_SIZE = 15
 TRAINING_EPISODES = 500  # 训练轮数
-FONT_PATH = 'simhei.ttf'
+FONT_PATH = "E:/Project/tank-battle/Maze_AI/run/simhei.ttf"
+USER_PATH = "E:/Project/tank-battle/Maze_AI/run/user.png"
 
 # 动作映射：0=上 1=下 2=左 3=右
 ACTION_NAMES = ['UP', 'DOWN', 'LEFT', 'RIGHT']
@@ -135,7 +136,7 @@ def play_ai_mode(env, agent, r_list):
     screen.fill(color.White)
     
     # 加载角色
-    user = pygame.image.load("user.png").convert_alpha()
+    user = pygame.image.load(USER_PATH).convert_alpha()
     user = pygame.transform.smoothscale(user, (8, 8))
     
     # 绘制迷宫
@@ -228,7 +229,7 @@ def play_manual_mode(r_list):
     screen.fill(color.White)
     
     # 加载角色
-    user = pygame.image.load("user.png").convert_alpha()
+    user = pygame.image.load(USER_PATH).convert_alpha()
     user = pygame.transform.smoothscale(user, (8, 8))
     
     # 绘制迷宫
