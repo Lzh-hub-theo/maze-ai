@@ -1,0 +1,8 @@
+pygame>=2.5
+numpy>=1.23
+torch>=2.0
+matplotlib>=3.6
+imageio>=2.31
+imageio-ffmpeg>=0.4.9
+flask>=3.0
+flask-socketio>=5.3

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m py_compile config.py maze.py env.py bfs.py dqn_agent.py visualizer.py main.py)"
+    ]
+  }
+}
