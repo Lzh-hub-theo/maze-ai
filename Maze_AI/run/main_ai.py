@@ -384,9 +384,9 @@ if __name__ == '__main__':
     agent = DQNAgent(
         action_size,
         learning_rate=1e-3,   # 可调
-        gamma=0.998,           # 统一gamma
+        gamma=0.95,           # 统一gamma
         epsilon=1.0,          # 可调
-        epsilon_decay=0.995,  # 可调
+        epsilon_decay=0.99,  # 可调
         epsilon_min=0.01       # 可调
     )
 

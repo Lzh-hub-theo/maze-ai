@@ -49,11 +49,19 @@ def compute_distance_score(maze):
                     dist[nr][nc] = dist[r][c] + 1
                     q.append((nr, nc))
 
-    # 3. 不可达位置分数设为0，可达位置为到终点的步数
+    # 3. 不可达位置分数设为很大的正数（agent不应该去那里）
+    # 可达位置为到终点的步数
+    max_reachable_dist = max(dist[r][c] for r in range(rows) for c in range(cols) if dist[r][c] != -1)
+    INFINITE_DIST = max_reachable_dist + 100  # 比最远可达距离大100，确保不可达区域的shaping为负
+
     score = [[0] * cols for _ in range(rows)]
     for r in range(rows):
         for c in range(cols):
-            if dist[r][c] != -1:
+            if dist[r][c] == -1:
+                # 不可达位置设为 INFINITE_DIST（很大的正数）
+                # 当agent误入这些区域时，moving away会得到负reward
+                score[r][c] = INFINITE_DIST
+            else:
                 score[r][c] = dist[r][c]
 
     return score

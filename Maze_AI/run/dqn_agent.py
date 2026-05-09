@@ -10,7 +10,7 @@ from dqn.replay_buffer import ReplayBuffer
 from dqn.dqn_net import DQNNet
 
 class DQNAgent:
-    def __init__(self, action_size, state_dim=2, device=None, learning_rate=1e-3, gamma=0.998, epsilon=1.0, epsilon_decay=0.995, epsilon_min=0.1):
+    def __init__(self, action_size, state_dim=2, device=None, learning_rate=1e-3, gamma=0.95, epsilon=1.0, epsilon_decay=0.99, epsilon_min=0.01):
         self.action_size = action_size
         self.memory = ReplayBuffer(maxlen=10000)
         self.gamma = gamma
@@ -24,14 +24,14 @@ class DQNAgent:
         if self.device == "cuda":
             print(f"CUDA version: {torch.version.cuda}")
             print(f"GPU: {torch.cuda.get_device_name(0)}")
-        self.policy_net = DQNNet(state_dim, action_size, hidden_dim=256, dropout_p=0.0).to(self.device)
-        self.target_net = DQNNet(state_dim, action_size, hidden_dim=256, dropout_p=0.0).to(self.device)
+        self.policy_net = DQNNet(state_dim, action_size, hidden_dim=256).to(self.device)
+        self.target_net = DQNNet(state_dim, action_size, hidden_dim=256).to(self.device)
         self.target_net.eval()  # 目标网络始终保持 eval 模式
         self.update_target()
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.learning_rate)
         self.loss_fn = nn.SmoothL1Loss()  # 使用 Huber 损失，更稳定
         self.learn_step = 0
-        self.target_update_freq = 500
+        self.target_update_freq = 200  # 更频繁更新目标网络
 
     def update_target(self):
         self.target_net.load_state_dict(self.policy_net.state_dict())
@@ -72,6 +72,7 @@ class DQNAgent:
         self.learn_step += 1
         if self.learn_step % self.target_update_freq == 0:
             self.update_target()
+            
         # epsilon 衰减移到 episode 结束后
         # if self.epsilon > self.epsilon_min:
         #     self.epsilon *= self.epsilon_decay

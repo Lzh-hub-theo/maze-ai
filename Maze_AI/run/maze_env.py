@@ -8,10 +8,10 @@ from score_map import score_matrix
 
 class MazeEnv:
     # 奖励设置
-    REWARD_GOAL = 20000.0      # 到达终点奖励
+    REWARD_GOAL = 100.0      # 到达终点奖励
     REWARD_STEP = 0      # 每步惩罚
-    REWARD_WALL = -0.1       # 撞墙惩罚
-    REWARD_REVISIT = -0.1    # 重复访问惩罚
+    REWARD_WALL = -2       # 撞墙惩罚
+    REWARD_REVISIT = 0    # 重复访问惩罚
 
     """基于mapp.py的大地图迷宫环境，状态为归一化(x, y)"""
     def __init__(self):
@@ -77,7 +77,11 @@ class MazeEnv:
 
         potential_old = score_matrix[old_y][old_x]
         potential_new = score_matrix[new_y][new_x]
-        shaping = 0.998 * potential_old - potential_new
+        temp = potential_old - potential_new
+        if temp < 0:
+            shaping = temp * 2
+        else:
+            shaping = temp
         reward = self.REWARD_STEP + shaping
 
         if self.agent_pos in self.visited:
