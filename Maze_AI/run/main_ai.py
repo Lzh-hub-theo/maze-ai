@@ -28,8 +28,9 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
 ROOM_SIZE = 15
 TRAINING_EPISODES = 500  # 训练轮数
-FONT_PATH = "E:/Project/tank-battle/Maze_AI/run/simhei.ttf"
-USER_PATH = "E:/Project/tank-battle/Maze_AI/run/user.png"
+# 这两个路径改为文件放置的绝对路径
+FONT_PATH = "E:/Project/maze-ai/Maze_AI/run/simhei.ttf"
+USER_PATH = "E:/Project/maze-ai/Maze_AI/run/user.png"
 
 # 动作映射：0=上 1=下 2=左 3=右
 ACTION_NAMES = ['UP', 'DOWN', 'LEFT', 'RIGHT']
